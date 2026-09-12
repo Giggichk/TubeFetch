@@ -40,8 +40,3 @@ def print_qualities(clean_formats, index, choice):
         print(f"{choice}-ext:{clean_formats[index]['ext']}, height:{clean_formats[index]['height']}, fps:{clean_formats[index]['fps']}")
     except IndexError as err:
         print(err)
-
-
-if __name__ == "__main__":
-    lst = available_qualities("https://youtu.be/OTYIoEuKMmE?si=rgviYuPM7VvbsCD6", {"cookiesfrombrowser": ("firefox",)})
-    print(lst)
