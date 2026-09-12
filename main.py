@@ -1,12 +1,15 @@
 import os
 from tabulate import tabulate
 from src.utils import get_browser_name
-from src.validations import change_path, check_input, check_correct_link
+from src.validations import check_input, check_correct_link, prompt_download_path
 from src.downloads import download, change_format
 from src.formats import available_qualities
 
 
 def main():
+    print("🎬 TubeFetch CLI")
+    print("=" * 40)
+
     ydl_opts = {
         "cookiesfrombrowser": (get_browser_name(),),
         "quiet": True,
@@ -16,9 +19,18 @@ def main():
 
     try:
         info = available_qualities(url, ydl_opts)
-        print(tabulate(info, headers="keys", tablefmt="grid", showindex=True))
+        if not info:
+            print("❌ Не удалось получить доступные форматы.")
+            return
 
-        format = check_input()
+        print("\n📺 Доступные форматы:")
+        print(tabulate(info, headers="keys", tablefmt="rounded_grid", showindex=True))
+
+        while True:
+            format = check_input()
+            if 0 <= format < len(info):
+                break
+            print(f"❌ Введите число от 0 до {len(info) - 1}")
 
         if info[format]['ext'] == "mp4":
             ydl_opts.setdefault("format", change_format(info[format]["height"],
@@ -31,20 +43,16 @@ def main():
                                                         info[format]["ext"],
                                                         "webm"))
 
-        path = input("Please specify the directory where you want to download the video: ")
-        valid_path = change_path(path)
+        valid_path = prompt_download_path()
+        full_output_template = os.path.join(str(valid_path), "%(title)s.%(ext)s")
+        ydl_opts.setdefault("outtmpl", full_output_template)
 
-        if valid_path:
-            full_output_template = os.path.join(str(valid_path), "%(title)s.%(ext)s")
-            ydl_opts.setdefault("outtmpl", full_output_template)
-
-            run = input("Do you want to run? (y/n): ").lower()
-            if run == "y":
-                download(url, ydl_opts)
-                print("Video has been downloaded")
-
+        run = input("▶️ Начать скачивание? (y/n): ").strip().lower()
+        if run == "y":
+            download(url, ydl_opts)
+            print("✅ Видео успешно скачано")
         else:
-            print("Path is not valid")
+            print("ℹ️ Скачивание отменено")
 
     except Exception as e:
         print(e)
@@ -52,7 +60,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
 
 
 
