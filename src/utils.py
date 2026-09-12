@@ -1,4 +1,5 @@
 import re
+import sys
 from winreg import OpenKey, HKEY_CURRENT_USER, HKEY_CLASSES_ROOT, QueryValueEx
 
 
@@ -15,5 +16,8 @@ def get_browser_name() -> str:
     return found_browser.split('.')[0]
 
 
-if __name__ == '__main__':
-    print(get_browser_name())
+def get_ffmpeg():
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+        return base_path
+    return None

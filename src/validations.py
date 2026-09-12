@@ -1,49 +1,35 @@
 import re
-import os
 import pathlib
-from yt_dlp import YoutubeDL
-from yt_dlp.utils import DownloadError, ExtractorError
+import os
 
 
 def check_correct_link():
     pattern = r"^(https?://)?(www\.)?(youtube\.com/(watch\?v=|shorts/)|youtu\.be/)[\w-]{11}"
     while True:
         try:
-            url = input("Enter the link: ")
+            url = input("Введите ссылку с YouTube на видео ➡️: ")
             if bool(re.match(pattern, url)):
                 return url
             else:
                 raise ValueError()
         except ValueError:
-            print("Please enter a valid link")
+            print("Пожалуйста, введите корректную ссылку ⚠️")
 
 
-def check_exist_link(url, options=None):
-    opts = {
-        'extract_flat': False,
-        'quiet': True,
-        'no_warnings': True,
-        **(options or {})
-    }
-
-    with YoutubeDL(opts) as ydl:
-        try:
-            info = ydl.extract_info(url, download=False)
-            return True, "Supported link"
-        except (ExtractorError, DownloadError) as error:
-            clean_error = str(error).replace("ERROR: ", "").strip()
-            return False, clean_error
-
-
-def check_input():
+def check_input(max_len):
     while True:
         try:
-            return int(input("Please, enter the number: "))
+            number = int(input("Введите желаемый формат для скачивания: "))
+            if 0 <= number <= max_len - 1:
+                return number
+            else:
+                raise ValueError()
         except ValueError:
-            print("Please, enter a number")
+            print("Выберите только доступные форматы ❌")
 
 
 def change_path(dir):
+
     path = pathlib.Path(dir)
 
     if path.is_absolute():
@@ -69,3 +55,13 @@ def change_path(dir):
                     return potential_path.resolve()
 
         return False
+
+
+def prompt_download_path():
+    while True:
+        path = input("📂 Укажите папку для скачивания: ").strip()
+        valid_path = change_path(path)
+        if valid_path:
+            print(f"✅ Путь принят: {valid_path}")
+            return valid_path
+        print("❌ Неверный путь. Укажите существующую папку.")
