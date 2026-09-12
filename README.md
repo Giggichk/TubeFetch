@@ -36,15 +36,15 @@
 
 ### 1. Клонирование репозитория
 ```bash
-git clone -b develop https://github.com/Giggichk/TubeFetch.git
+git clone https://github.com/Giggichk/TubeFetch.git
 cd TubeFetch
 ```
 
 ### 2. Создание и активация виртуального окружения
 ```bash
 # Windows
-python -m venv venv
-venv\Scripts\activate
+python -m venv .venv
+.venv\Scripts\activate
 
 # Linux / macOS
 python3 -m venv venv
