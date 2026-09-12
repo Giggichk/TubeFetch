@@ -1,5 +1,4 @@
 import re
-import os
 import pathlib
 from yt_dlp import YoutubeDL
 from yt_dlp.utils import DownloadError, ExtractorError
@@ -44,28 +43,27 @@ def check_input():
 
 
 def change_path(dir):
-    path = pathlib.Path(dir)
-
-    if path.is_absolute():
-        if path.is_dir() and path.exists():
-            return path
-        else:
-            return False
-    else:
-        home_dir = pathlib.Path.home()
-        current_project_dir = pathlib.Path.cwd()
-
-        target_name = path.name
-
-        for root, dirs, files in os.walk(home_dir):
-            root_path = pathlib.Path(root)
-            if current_project_dir in root_path.parents or root_path == current_project_dir:
-                continue
-
-            if target_name in dirs:
-                potential_path = root_path / target_name
-
-                if potential_path.match(f"*{path}"):
-                    return potential_path.resolve()
-
+    if not dir or not str(dir).strip():
         return False
+
+    raw_path = pathlib.Path(str(dir).strip()).expanduser()
+    path = raw_path if raw_path.is_absolute() else (pathlib.Path.cwd() / raw_path)
+
+    try:
+        resolved_path = path.resolve(strict=False)
+    except (RuntimeError, OSError):
+        return False
+
+    if resolved_path.exists() and resolved_path.is_dir():
+        return resolved_path
+    return False
+
+
+def prompt_download_path():
+    while True:
+        path = input("📂 Укажите папку для скачивания: ").strip()
+        valid_path = change_path(path)
+        if valid_path:
+            print(f"✅ Путь принят: {valid_path}")
+            return valid_path
+        print("❌ Неверный путь. Укажите существующую папку.")
